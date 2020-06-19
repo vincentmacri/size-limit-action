@@ -49,25 +49,28 @@ async function run() {
       throw error;
     }
 
-    const event = status > 0 ? "REQUEST_CHANGES" : "COMMENT";
-    const body = [
-      `## [size-limit](${SIZE_LIMIT_URL}) report`,
-      table(limit.formatResults(base, current))
-    ].join("\r\n");
-
-    try {
-      octokit.pulls.createReview({
-        ...repo,
-        // eslint-disable-next-line camelcase
-        pull_number: pr.number,
-        event,
-        body
-      });
-    } catch (error) {
-      console.log(
-        "Error creating PR review. This can happen for PR's originating from a fork without write permissions."
-      );
+    const failed = status > 0;// ? "REQUEST_CHANGES" : "COMMENT";
+    if (failed) {
+      core.setFailed("Failed");
     }
+    //const body = [
+    //  `## [size-limit](${SIZE_LIMIT_URL}) report`,
+    //  table(limit.formatResults(base, current))
+    //].join("\r\n");
+
+    //try {
+    //  octokit.pulls.createReview({
+    //    ...repo,
+    //    // eslint-disable-next-line camelcase
+    //    pull_number: pr.number,
+    //    event,
+    //    body
+    //  });
+    //} catch (error) {
+    //  console.log(
+    //    "Error creating PR review. This can happen for PR's originating from a fork without write permissions."
+    //  );
+    //}
   } catch (error) {
     setFailed(error.message);
   }
