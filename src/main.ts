@@ -6,6 +6,7 @@ import Term from "./Term";
 import SizeLimit from "./SizeLimit";
 
 const SIZE_LIMIT_URL = "https://github.com/ai/size-limit";
+const SIZE_LIMIT_HEADING = `## [size-limit](${SIZE_LIMIT_URL}) report`;
 
 async function run() {
   try {
@@ -54,23 +55,45 @@ async function run() {
       setFailed("Failed");
     }
     const body = [
-      `## [size-limit](${SIZE_LIMIT_URL}) report`,
+      SIZE_LIMIT_HEADING,
       table(limit.formatResults(base, current))
     ].join("\r\n");
 
-    console.log(octokit.issues.listComments({...repo, issue_number: pr.number}));
+    const { data: commentList } = await octokit.issues.listComments({
+      ...repo,
+      issue_number: pr.number
+    });
 
-    try {
-      octokit.issues.createComment({
-        ...repo,
-        // eslint-disable-next-line camelcase
-        issue_number: pr.number,
-        body
-      });
-    } catch (error) {
-      console.log(
-        "Error creating comment. This can happen for PR's originating from a fork without write permissions."
-      );
+    const sizeLimitComment = commentList.find(comment =>
+      comment.body.startsWith(SIZE_LIMIT_HEADING)
+    );
+
+    if (sizeLimitComment == undefined) {
+      try {
+        octokit.issues.createComment({
+          ...repo,
+          // eslint-disable-next-line camelcase
+          issue_number: pr.number,
+          body
+        });
+      } catch (error) {
+        console.log(
+          "Error creating comment. This can happen for PR's originating from a fork without write permissions."
+        );
+      }
+    } else {
+      try {
+        octokit.issues.updateComment({
+          ...repo,
+          // eslint-disable-next-line camelcase
+          comment_id: sizeLimitComment.id,
+          body
+        });
+      } catch (error) {
+        console.log(
+          "Error updating comment. This can happen for PR's originating from a fork without write permissions."
+        );
+      }
     }
   } catch (error) {
     setFailed(error.message);

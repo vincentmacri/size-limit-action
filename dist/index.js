@@ -2012,6 +2012,7 @@ const markdown_table_1 = __importDefault(__webpack_require__(366));
 const Term_1 = __importDefault(__webpack_require__(733));
 const SizeLimit_1 = __importDefault(__webpack_require__(617));
 const SIZE_LIMIT_URL = "https://github.com/ai/size-limit";
+const SIZE_LIMIT_HEADING = `## [size-limit](${SIZE_LIMIT_URL}) report`;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -2043,17 +2044,30 @@ function run() {
                 core_1.setFailed("Failed");
             }
             const body = [
-                `## [size-limit](${SIZE_LIMIT_URL}) report`,
+                SIZE_LIMIT_HEADING,
                 markdown_table_1.default(limit.formatResults(base, current))
             ].join("\r\n");
-            console.log(octokit.issues.listComments(Object.assign(Object.assign({}, repo), { issue_number: pr.number })));
-            try {
-                octokit.issues.createComment(Object.assign(Object.assign({}, repo), { 
-                    // eslint-disable-next-line camelcase
-                    issue_number: pr.number, body }));
+            const { data: commentList } = yield octokit.issues.listComments(Object.assign(Object.assign({}, repo), { issue_number: pr.number }));
+            const sizeLimitComment = commentList.find(comment => comment.body.startsWith(SIZE_LIMIT_HEADING));
+            if (sizeLimitComment == undefined) {
+                try {
+                    octokit.issues.createComment(Object.assign(Object.assign({}, repo), { 
+                        // eslint-disable-next-line camelcase
+                        issue_number: pr.number, body }));
+                }
+                catch (error) {
+                    console.log("Error creating comment. This can happen for PR's originating from a fork without write permissions.");
+                }
             }
-            catch (error) {
-                console.log("Error creating comment. This can happen for PR's originating from a fork without write permissions.");
+            else {
+                try {
+                    octokit.issues.updateComment(Object.assign(Object.assign({}, repo), { 
+                        // eslint-disable-next-line camelcase
+                        comment_id: sizeLimitComment.id, body }));
+                }
+                catch (error) {
+                    console.log("Error updating comment. This can happen for PR's originating from a fork without write permissions.");
+                }
             }
         }
         catch (error) {
