@@ -51,7 +51,7 @@ async function run() {
 
     const failed = status > 0;// ? "REQUEST_CHANGES" : "COMMENT";
     if (failed) {
-      core.setFailed("Failed");
+      setFailed("Failed");
     }
     //const body = [
     //  `## [size-limit](${SIZE_LIMIT_URL}) report`,
