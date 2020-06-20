@@ -444,84 +444,6 @@ module.exports = osName;
 
 /***/ }),
 
-/***/ 8:
-/***/ (function(module) {
-
-"use strict";
-/*!
- * repeat-string <https://github.com/jonschlinkert/repeat-string>
- *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-/**
- * Results cache
- */
-
-var res = '';
-var cache;
-
-/**
- * Expose `repeat`
- */
-
-module.exports = repeat;
-
-/**
- * Repeat the given `string` the specified `number`
- * of times.
- *
- * **Example:**
- *
- * ```js
- * var repeat = require('repeat-string');
- * repeat('A', 5);
- * //=> AAAAA
- * ```
- *
- * @param {String} `string` The string to repeat
- * @param {Number} `number` The number of times to repeat the string
- * @return {String} Repeated string
- * @api public
- */
-
-function repeat(str, num) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-
-  // cover common, quick use cases
-  if (num === 1) return str;
-  if (num === 2) return str + str;
-
-  var max = str.length * num;
-  if (cache !== str || typeof cache === 'undefined') {
-    cache = str;
-    res = '';
-  } else if (res.length >= max) {
-    return res.substr(0, max);
-  }
-
-  while (max > res.length && num > 1) {
-    if (num & 1) {
-      res += str;
-    }
-
-    num >>= 1;
-    str += str;
-  }
-
-  res += str;
-  res = res.substr(0, max);
-  return res;
-}
-
-
-/***/ }),
-
 /***/ 9:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2007,8 +1929,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = __webpack_require__(470);
 const github_1 = __webpack_require__(469);
-// @ts-ignore
-const markdown_table_1 = __importDefault(__webpack_require__(366));
 const Term_1 = __importDefault(__webpack_require__(733));
 const SizeLimit_1 = __importDefault(__webpack_require__(617));
 const SIZE_LIMIT_URL = "https://github.com/ai/size-limit";
@@ -2038,20 +1958,27 @@ function run() {
                 console.log("Error parsing size-limit output. The output should be a json.");
                 throw error;
             }
-            const event = status > 0 ? "REQUEST_CHANGES" : "COMMENT";
-            const body = [
-                `## [size-limit](${SIZE_LIMIT_URL}) report`,
-                markdown_table_1.default(limit.formatResults(base, current))
-            ].join("\r\n");
-            try {
-                octokit.pulls.createReview(Object.assign(Object.assign({}, repo), { 
-                    // eslint-disable-next-line camelcase
-                    pull_number: pr.number, event,
-                    body }));
+            const failed = status > 0; // ? "REQUEST_CHANGES" : "COMMENT";
+            if (failed) {
+                core_1.setFailed("Failed");
             }
-            catch (error) {
-                console.log("Error creating PR review. This can happen for PR's originating from a fork without write permissions.");
-            }
+            //const body = [
+            //  `## [size-limit](${SIZE_LIMIT_URL}) report`,
+            //  table(limit.formatResults(base, current))
+            //].join("\r\n");
+            //try {
+            //  octokit.pulls.createReview({
+            //    ...repo,
+            //    // eslint-disable-next-line camelcase
+            //    pull_number: pr.number,
+            //    event,
+            //    body
+            //  });
+            //} catch (error) {
+            //  console.log(
+            //    "Error creating PR review. This can happen for PR's originating from a fork without write permissions."
+            //  );
+            //}
         }
         catch (error) {
             core_1.setFailed(error.message);
@@ -2650,7 +2577,7 @@ exports.getUserAgent = getUserAgent;
 /***/ 215:
 /***/ (function(module) {
 
-module.exports = {"_args":[["@octokit/rest@16.43.1","/Users/andres.alvarez/Projects/size-limit-action"]],"_from":"@octokit/rest@16.43.1","_id":"@octokit/rest@16.43.1","_inBundle":false,"_integrity":"sha512-gfFKwRT/wFxq5qlNjnW2dh+qh74XgTQ2B179UX5K1HYCluioWj8Ndbgqw2PVqa1NnVJkGHp2ovMpVn/DImlmkw==","_location":"/@octokit/rest","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"@octokit/rest@16.43.1","name":"@octokit/rest","escapedName":"@octokit%2frest","scope":"@octokit","rawSpec":"16.43.1","saveSpec":null,"fetchSpec":"16.43.1"},"_requiredBy":["/@actions/github"],"_resolved":"https://registry.npmjs.org/@octokit/rest/-/rest-16.43.1.tgz","_spec":"16.43.1","_where":"/Users/andres.alvarez/Projects/size-limit-action","author":{"name":"Gregor Martynus","url":"https://github.com/gr2m"},"bugs":{"url":"https://github.com/octokit/rest.js/issues"},"bundlesize":[{"path":"./dist/octokit-rest.min.js.gz","maxSize":"33 kB"}],"contributors":[{"name":"Mike de Boer","email":"info@mikedeboer.nl"},{"name":"Fabian Jakobs","email":"fabian@c9.io"},{"name":"Joe Gallo","email":"joe@brassafrax.com"},{"name":"Gregor Martynus","url":"https://github.com/gr2m"}],"dependencies":{"@octokit/auth-token":"^2.4.0","@octokit/plugin-paginate-rest":"^1.1.1","@octokit/plugin-request-log":"^1.0.0","@octokit/plugin-rest-endpoint-methods":"2.4.0","@octokit/request":"^5.2.0","@octokit/request-error":"^1.0.2","atob-lite":"^2.0.0","before-after-hook":"^2.0.0","btoa-lite":"^1.0.0","deprecation":"^2.0.0","lodash.get":"^4.4.2","lodash.set":"^4.3.2","lodash.uniq":"^4.5.0","octokit-pagination-methods":"^1.1.0","once":"^1.4.0","universal-user-agent":"^4.0.0"},"description":"GitHub REST API client for Node.js","devDependencies":{"@gimenete/type-writer":"^0.1.3","@octokit/auth":"^1.1.1","@octokit/fixtures-server":"^5.0.6","@octokit/graphql":"^4.2.0","@types/node":"^13.1.0","bundlesize":"^0.18.0","chai":"^4.1.2","compression-webpack-plugin":"^3.1.0","cypress":"^3.0.0","glob":"^7.1.2","http-proxy-agent":"^4.0.0","lodash.camelcase":"^4.3.0","lodash.merge":"^4.6.1","lodash.upperfirst":"^4.3.1","lolex":"^5.1.2","mkdirp":"^1.0.0","mocha":"^7.0.1","mustache":"^4.0.0","nock":"^11.3.3","npm-run-all":"^4.1.2","nyc":"^15.0.0","prettier":"^1.14.2","proxy":"^1.0.0","semantic-release":"^17.0.0","sinon":"^8.0.0","sinon-chai":"^3.0.0","sort-keys":"^4.0.0","string-to-arraybuffer":"^1.0.0","string-to-jsdoc-comment":"^1.0.0","typescript":"^3.3.1","webpack":"^4.0.0","webpack-bundle-analyzer":"^3.0.0","webpack-cli":"^3.0.0"},"files":["index.js","index.d.ts","lib","plugins"],"homepage":"https://github.com/octokit/rest.js#readme","keywords":["octokit","github","rest","api-client"],"license":"MIT","name":"@octokit/rest","nyc":{"ignore":["test"]},"publishConfig":{"access":"public"},"release":{"publish":["@semantic-release/npm",{"path":"@semantic-release/github","assets":["dist/*","!dist/*.map.gz"]}]},"repository":{"type":"git","url":"git+https://github.com/octokit/rest.js.git"},"scripts":{"build":"npm-run-all build:*","build:browser":"npm-run-all build:browser:*","build:browser:development":"webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json","build:browser:production":"webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map","build:ts":"npm run -s update-endpoints:typescript","coverage":"nyc report --reporter=html && open coverage/index.html","generate-bundle-report":"webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html","lint":"prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","lint:fix":"prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","postvalidate:ts":"tsc --noEmit --target es6 test/typescript-validate.ts","prebuild:browser":"mkdirp dist/","pretest":"npm run -s lint","prevalidate:ts":"npm run -s build:ts","start-fixtures-server":"octokit-fixtures-server","test":"nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"","test:browser":"cypress run --browser chrome","update-endpoints":"npm-run-all update-endpoints:*","update-endpoints:fetch-json":"node scripts/update-endpoints/fetch-json","update-endpoints:typescript":"node scripts/update-endpoints/typescript","validate:ts":"tsc --target es6 --noImplicitAny index.d.ts"},"types":"index.d.ts","version":"16.43.1"};
+module.exports = {"_args":[["@octokit/rest@16.43.1","/home/vince/Documents/mathNEWS/size-limit-action"]],"_from":"@octokit/rest@16.43.1","_id":"@octokit/rest@16.43.1","_inBundle":false,"_integrity":"sha512-gfFKwRT/wFxq5qlNjnW2dh+qh74XgTQ2B179UX5K1HYCluioWj8Ndbgqw2PVqa1NnVJkGHp2ovMpVn/DImlmkw==","_location":"/@octokit/rest","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"@octokit/rest@16.43.1","name":"@octokit/rest","escapedName":"@octokit%2frest","scope":"@octokit","rawSpec":"16.43.1","saveSpec":null,"fetchSpec":"16.43.1"},"_requiredBy":["/@actions/github"],"_resolved":"https://registry.npmjs.org/@octokit/rest/-/rest-16.43.1.tgz","_spec":"16.43.1","_where":"/home/vince/Documents/mathNEWS/size-limit-action","author":{"name":"Gregor Martynus","url":"https://github.com/gr2m"},"bugs":{"url":"https://github.com/octokit/rest.js/issues"},"bundlesize":[{"path":"./dist/octokit-rest.min.js.gz","maxSize":"33 kB"}],"contributors":[{"name":"Mike de Boer","email":"info@mikedeboer.nl"},{"name":"Fabian Jakobs","email":"fabian@c9.io"},{"name":"Joe Gallo","email":"joe@brassafrax.com"},{"name":"Gregor Martynus","url":"https://github.com/gr2m"}],"dependencies":{"@octokit/auth-token":"^2.4.0","@octokit/plugin-paginate-rest":"^1.1.1","@octokit/plugin-request-log":"^1.0.0","@octokit/plugin-rest-endpoint-methods":"2.4.0","@octokit/request":"^5.2.0","@octokit/request-error":"^1.0.2","atob-lite":"^2.0.0","before-after-hook":"^2.0.0","btoa-lite":"^1.0.0","deprecation":"^2.0.0","lodash.get":"^4.4.2","lodash.set":"^4.3.2","lodash.uniq":"^4.5.0","octokit-pagination-methods":"^1.1.0","once":"^1.4.0","universal-user-agent":"^4.0.0"},"description":"GitHub REST API client for Node.js","devDependencies":{"@gimenete/type-writer":"^0.1.3","@octokit/auth":"^1.1.1","@octokit/fixtures-server":"^5.0.6","@octokit/graphql":"^4.2.0","@types/node":"^13.1.0","bundlesize":"^0.18.0","chai":"^4.1.2","compression-webpack-plugin":"^3.1.0","cypress":"^3.0.0","glob":"^7.1.2","http-proxy-agent":"^4.0.0","lodash.camelcase":"^4.3.0","lodash.merge":"^4.6.1","lodash.upperfirst":"^4.3.1","lolex":"^5.1.2","mkdirp":"^1.0.0","mocha":"^7.0.1","mustache":"^4.0.0","nock":"^11.3.3","npm-run-all":"^4.1.2","nyc":"^15.0.0","prettier":"^1.14.2","proxy":"^1.0.0","semantic-release":"^17.0.0","sinon":"^8.0.0","sinon-chai":"^3.0.0","sort-keys":"^4.0.0","string-to-arraybuffer":"^1.0.0","string-to-jsdoc-comment":"^1.0.0","typescript":"^3.3.1","webpack":"^4.0.0","webpack-bundle-analyzer":"^3.0.0","webpack-cli":"^3.0.0"},"files":["index.js","index.d.ts","lib","plugins"],"homepage":"https://github.com/octokit/rest.js#readme","keywords":["octokit","github","rest","api-client"],"license":"MIT","name":"@octokit/rest","nyc":{"ignore":["test"]},"publishConfig":{"access":"public"},"release":{"publish":["@semantic-release/npm",{"path":"@semantic-release/github","assets":["dist/*","!dist/*.map.gz"]}]},"repository":{"type":"git","url":"git+https://github.com/octokit/rest.js.git"},"scripts":{"build":"npm-run-all build:*","build:browser":"npm-run-all build:browser:*","build:browser:development":"webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json","build:browser:production":"webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map","build:ts":"npm run -s update-endpoints:typescript","coverage":"nyc report --reporter=html && open coverage/index.html","generate-bundle-report":"webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html","lint":"prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","lint:fix":"prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","postvalidate:ts":"tsc --noEmit --target es6 test/typescript-validate.ts","prebuild:browser":"mkdirp dist/","pretest":"npm run -s lint","prevalidate:ts":"npm run -s build:ts","start-fixtures-server":"octokit-fixtures-server","test":"nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"","test:browser":"cypress run --browser chrome","update-endpoints":"npm-run-all update-endpoints:*","update-endpoints:fetch-json":"node scripts/update-endpoints/fetch-json","update-endpoints:typescript":"node scripts/update-endpoints/typescript","validate:ts":"tsc --target es6 --noImplicitAny index.d.ts"},"types":"index.d.ts","version":"16.43.1"};
 
 /***/ }),
 
@@ -5045,263 +4972,6 @@ function register (state, name, method, options) {
         return registered.hook.bind(null, method, options)
       }, method)()
     })
-}
-
-
-/***/ }),
-
-/***/ 366:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var repeat = __webpack_require__(8)
-
-module.exports = markdownTable
-
-var trailingWhitespace = / +$/
-
-// Characters.
-var space = ' '
-var lineFeed = '\n'
-var dash = '-'
-var colon = ':'
-var verticalBar = '|'
-
-var x = 0
-var C = 67
-var L = 76
-var R = 82
-var c = 99
-var l = 108
-var r = 114
-
-// Create a table from a matrix of strings.
-function markdownTable(table, options) {
-  var settings = options || {}
-  var padding = settings.padding !== false
-  var start = settings.delimiterStart !== false
-  var end = settings.delimiterEnd !== false
-  var align = (settings.align || []).concat()
-  var alignDelimiters = settings.alignDelimiters !== false
-  var alignments = []
-  var stringLength = settings.stringLength || defaultStringLength
-  var rowIndex = -1
-  var rowLength = table.length
-  var cellMatrix = []
-  var sizeMatrix = []
-  var row = []
-  var sizes = []
-  var longestCellByColumn = []
-  var mostCellsPerRow = 0
-  var cells
-  var columnIndex
-  var columnLength
-  var largest
-  var size
-  var cell
-  var lines
-  var line
-  var before
-  var after
-  var code
-
-  // This is a superfluous loop if we don’t align delimiters, but otherwise we’d
-  // do superfluous work when aligning, so optimize for aligning.
-  while (++rowIndex < rowLength) {
-    cells = table[rowIndex]
-    columnIndex = -1
-    columnLength = cells.length
-    row = []
-    sizes = []
-
-    if (columnLength > mostCellsPerRow) {
-      mostCellsPerRow = columnLength
-    }
-
-    while (++columnIndex < columnLength) {
-      cell = serialize(cells[columnIndex])
-
-      if (alignDelimiters === true) {
-        size = stringLength(cell)
-        sizes[columnIndex] = size
-
-        largest = longestCellByColumn[columnIndex]
-
-        if (largest === undefined || size > largest) {
-          longestCellByColumn[columnIndex] = size
-        }
-      }
-
-      row.push(cell)
-    }
-
-    cellMatrix[rowIndex] = row
-    sizeMatrix[rowIndex] = sizes
-  }
-
-  // Figure out which alignments to use.
-  columnIndex = -1
-  columnLength = mostCellsPerRow
-
-  if (typeof align === 'object' && 'length' in align) {
-    while (++columnIndex < columnLength) {
-      alignments[columnIndex] = toAlignment(align[columnIndex])
-    }
-  } else {
-    code = toAlignment(align)
-
-    while (++columnIndex < columnLength) {
-      alignments[columnIndex] = code
-    }
-  }
-
-  // Inject the alignment row.
-  columnIndex = -1
-  columnLength = mostCellsPerRow
-  row = []
-  sizes = []
-
-  while (++columnIndex < columnLength) {
-    code = alignments[columnIndex]
-    before = ''
-    after = ''
-
-    if (code === l) {
-      before = colon
-    } else if (code === r) {
-      after = colon
-    } else if (code === c) {
-      before = colon
-      after = colon
-    }
-
-    // There *must* be at least one hyphen-minus in each alignment cell.
-    size = alignDelimiters
-      ? Math.max(
-          1,
-          longestCellByColumn[columnIndex] - before.length - after.length
-        )
-      : 1
-
-    cell = before + repeat(dash, size) + after
-
-    if (alignDelimiters === true) {
-      size = before.length + size + after.length
-
-      if (size > longestCellByColumn[columnIndex]) {
-        longestCellByColumn[columnIndex] = size
-      }
-
-      sizes[columnIndex] = size
-    }
-
-    row[columnIndex] = cell
-  }
-
-  // Inject the alignment row.
-  cellMatrix.splice(1, 0, row)
-  sizeMatrix.splice(1, 0, sizes)
-
-  rowIndex = -1
-  rowLength = cellMatrix.length
-  lines = []
-
-  while (++rowIndex < rowLength) {
-    row = cellMatrix[rowIndex]
-    sizes = sizeMatrix[rowIndex]
-    columnIndex = -1
-    columnLength = mostCellsPerRow
-    line = []
-
-    while (++columnIndex < columnLength) {
-      cell = row[columnIndex] || ''
-      before = ''
-      after = ''
-
-      if (alignDelimiters === true) {
-        size = longestCellByColumn[columnIndex] - (sizes[columnIndex] || 0)
-        code = alignments[columnIndex]
-
-        if (code === r) {
-          before = repeat(space, size)
-        } else if (code === c) {
-          if (size % 2 === 0) {
-            before = repeat(space, size / 2)
-            after = before
-          } else {
-            before = repeat(space, size / 2 + 0.5)
-            after = repeat(space, size / 2 - 0.5)
-          }
-        } else {
-          after = repeat(space, size)
-        }
-      }
-
-      if (start === true && columnIndex === 0) {
-        line.push(verticalBar)
-      }
-
-      if (
-        padding === true &&
-        // Don’t add the opening space if we’re not aligning and the cell is
-        // empty: there will be a closing space.
-        !(alignDelimiters === false && cell === '') &&
-        (start === true || columnIndex !== 0)
-      ) {
-        line.push(space)
-      }
-
-      if (alignDelimiters === true) {
-        line.push(before)
-      }
-
-      line.push(cell)
-
-      if (alignDelimiters === true) {
-        line.push(after)
-      }
-
-      if (padding === true) {
-        line.push(space)
-      }
-
-      if (end === true || columnIndex !== columnLength - 1) {
-        line.push(verticalBar)
-      }
-    }
-
-    line = line.join('')
-
-    if (end === false) {
-      line = line.replace(trailingWhitespace, '')
-    }
-
-    lines.push(line)
-  }
-
-  return lines.join(lineFeed)
-}
-
-function serialize(value) {
-  return value === null || value === undefined ? '' : String(value)
-}
-
-function defaultStringLength(value) {
-  return value.length
-}
-
-function toAlignment(value) {
-  var code = typeof value === 'string' ? value.charCodeAt(0) : x
-
-  return code === L || code === l
-    ? l
-    : code === R || code === r
-    ? r
-    : code === C || code === c
-    ? c
-    : x
 }
 
 
