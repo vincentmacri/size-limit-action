@@ -2046,6 +2046,7 @@ function run() {
                 `## [size-limit](${SIZE_LIMIT_URL}) report`,
                 markdown_table_1.default(limit.formatResults(base, current))
             ].join("\r\n");
+            console.log(octokit.issues.listComments(Object.assign(Object.assign({}, repo), { issue_number: pr.number })));
             try {
                 octokit.issues.createComment(Object.assign(Object.assign({}, repo), { 
                     // eslint-disable-next-line camelcase

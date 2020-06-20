@@ -58,6 +58,8 @@ async function run() {
       table(limit.formatResults(base, current))
     ].join("\r\n");
 
+    console.log(octokit.issues.listComments({...repo, issue_number: pr.number}));
+
     try {
       octokit.issues.createComment({
         ...repo,
