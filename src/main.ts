@@ -1,5 +1,6 @@
 import { getInput, setFailed } from "@actions/core";
 import { context, GitHub } from "@actions/github";
+
 // @ts-ignore
 import table from "markdown-table";
 import Term from "./Term";
@@ -7,16 +8,6 @@ import SizeLimit from "./SizeLimit";
 
 const SIZE_LIMIT_URL = "https://github.com/ai/size-limit";
 const SIZE_LIMIT_HEADING = `## [size-limit](${SIZE_LIMIT_URL}) report`;
-
-    const { data: commentList } = await octokit.issues.listComments({
-      ...repo,
-      issue_number: pr.number
-    });
-
-    const sizeLimitComment = commentList.find(comment =>
-      comment.body.startsWith(SIZE_LIMIT_HEADING)
-    );
-
 
 async function fetchPreviousComment(
   octokit: GitHub,
@@ -28,13 +19,14 @@ async function fetchPreviousComment(
     octokit.issues.listComments,
     {
       ...repo,
-      issue_number: pr.number
+      // eslint-disable-next-line camelcase
+      issue_number: pr.number,
     }
   )) {
-      // do whatever you want with each response, break out of the loop, etc.
-      if (response.body.startsWith(SIZE_LIMIT_HEADING)) {
-        return response;
-      }
+    // do whatever you want with each response, break out of the loop, etc.
+    if (response.body.startsWith(SIZE_LIMIT_HEADING)) {
+      return response;
+    }
   }
 }
 
