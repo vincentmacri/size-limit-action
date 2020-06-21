@@ -8,6 +8,36 @@ import SizeLimit from "./SizeLimit";
 const SIZE_LIMIT_URL = "https://github.com/ai/size-limit";
 const SIZE_LIMIT_HEADING = `## [size-limit](${SIZE_LIMIT_URL}) report`;
 
+    const { data: commentList } = await octokit.issues.listComments({
+      ...repo,
+      issue_number: pr.number
+    });
+
+    const sizeLimitComment = commentList.find(comment =>
+      comment.body.startsWith(SIZE_LIMIT_HEADING)
+    );
+
+
+async function fetchPreviousComment(
+  octokit: GitHub,
+  repo: { owner: string; repo: string },
+  pr: { number: number }
+) {
+
+  for await (const response of octokit.paginate.iterator(
+    octokit.issues.listComments,
+    {
+      ...repo,
+      issue_number: pr.number
+    }
+  )) {
+      // do whatever you want with each response, break out of the loop, etc.
+      if (response.body.startsWith(SIZE_LIMIT_HEADING)) {
+        return response;
+      }
+  }
+}
+
 async function run() {
   try {
     const { payload, repo } = context;
@@ -58,15 +88,6 @@ async function run() {
       SIZE_LIMIT_HEADING,
       table(limit.formatResults(base, current))
     ].join("\r\n");
-
-    const { data: commentList } = await octokit.issues.listComments({
-      ...repo,
-      issue_number: pr.number
-    });
-
-    const sizeLimitComment = commentList.find(comment =>
-      comment.body.startsWith(SIZE_LIMIT_HEADING)
-    );
 
     if (sizeLimitComment == undefined) {
       try {
