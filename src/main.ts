@@ -1,6 +1,8 @@
 import { getInput, setFailed } from "@actions/core";
 import { context, GitHub } from "@actions/github";
 
+import { Octokit } from "@octokit/rest";
+
 // @ts-ignore
 import table from "markdown-table";
 import Term from "./Term";
@@ -15,19 +17,22 @@ async function fetchPreviousComment(
   pr: { number: number }
 ) {
 
-  for await (const response of octokit.paginate.iterator(
-    octokit.issues.listComments,
+  const commentList: Octokit.IssuesListCommentsResponse = await octokit.paginate(
+    // TODO: replace with octokit.issues.listComments when upgraded to v17
+    //octokit.issues.listComments, {
+    "GET /repos/:owner/:repo/issues/:issue_number/comments",
     {
       ...repo,
       // eslint-disable-next-line camelcase
-      issue_number: pr.number,
-    }
-  )) {
-    // do whatever you want with each response, break out of the loop, etc.
-    if (response.body.startsWith(SIZE_LIMIT_HEADING)) {
-      return response;
-    }
-  }
+      issue_number: pr.number
+    });
+
+
+  const sizeLimitComment = commentList.find(
+    (comment: Octokit.IssuesListCommentsResponseItem) =>
+    comment.body.startsWith(SIZE_LIMIT_HEADING)
+  );
+  return !sizeLimitComment ? null : sizeLimitComment;
 }
 
 async function run() {
